@@ -7,7 +7,9 @@ class UserController {
 
     static async getAllUser(req, res) {
         try {
-            const users = await User.findAll()
+            const users = await User.findAll({
+                attributes: { exclude: ['password'] }
+            })
             res.status(200).json(users);
         } catch (err) {
             res.status(500).json(err);
@@ -44,7 +46,7 @@ class UserController {
                         status: 'Success',
                         email,
                         access_token,
-                        username 
+                        username
                     })
                 }
             } catch (err) {
@@ -96,7 +98,7 @@ class UserController {
                         msg: 'User not found'
                     })
                 } else if (decryptPwd(password, user.password) && user) {
-                    const { userData } = await User.findOne({
+                    const userData = await User.findOne({
                         where: {
                             id: user.id,
                         },
@@ -105,8 +107,9 @@ class UserController {
                     const access_token = tokenGenerator(user)
                     res.status(200).json({
                         status: 'Success',
-                        userData,
-                        access_token
+                        email: userData.email,
+                        access_token,
+                        username: userData.username
                     })
                 } else {
                     res.status(401).json({

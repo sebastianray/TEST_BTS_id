@@ -8,9 +8,7 @@ const tokenGenerator = (user) => {
         id,
         name,
         email
-    }, secretKey, 
-    // { expiresIn: '1h' }
-    )
+    }, secretKey)
 }
 
 const tokenVerifier = (access_token) => {
