@@ -5,7 +5,7 @@ const { Op } = require('sequelize')
 
 class UserController {
 
-    static async list(req, res) {
+    static async getAllUser(req, res) {
         try {
             const users = await User.findAll()
             res.status(200).json(users);
@@ -14,9 +14,8 @@ class UserController {
         }
     }
 
-    static async register(req, res, next) {
-        const { email, password, confirm_password } = req.body
-        const photo = req.file.path;
+    static async signUp(req, res, next) {
+        const { username, password, email, phone, country, city, postcode, name, address } = req.body
         if (Object.keys(req.body).length === 0) {
             res.status(400).json({
                 status: false,
@@ -36,23 +35,16 @@ class UserController {
                         status: 'false',
                         msg: 'Email is already registered'
                     });
-                } else if (confirm_password !== password) {
-                    res.status(401).json({
-                        status: 'false',
-                        msg: 'Password is not the same'
-                    });
-                }
-                else {
+                } else {
                     const user = await User.create({
-                        email: email.toLowerCase(),
-                        password,
-                        photo,
+                        username, password, email, phone, country, city, postcode, name, address
                     })
                     const access_token = tokenGenerator(user)
                     res.status(201).json({
                         status: 'Success',
-                        user,
-                        access_token
+                        email,
+                        access_token,
+                        username 
                     })
                 }
             } catch (err) {
@@ -61,7 +53,7 @@ class UserController {
         }
     }
 
-    static async login(req, res, next) {
+    static async signIn(req, res, next) {
         const { email, password } = req.body;
         const emailRegexp = /^[a-z_\-0-9\.\*\#\$\!\~\%\^\&\-\+\?\|]+@+[a-z\-0-9]+(.com)$/i;
         const isEmailFormat = emailRegexp.test(email);
@@ -104,7 +96,7 @@ class UserController {
                         msg: 'User not found'
                     })
                 } else if (decryptPwd(password, user.password) && user) {
-                    const userData = await User.findOne({
+                    const { userData } = await User.findOne({
                         where: {
                             id: user.id,
                         },
@@ -128,3 +120,5 @@ class UserController {
         }
     }
 }
+
+module.exports = UserController;
